@@ -5,10 +5,10 @@ namespace Spectre.Tui.Terminal;
 
 public interface ITerminal : IDisposable
 {
-    void Write(char text);
-    void Write(ReadOnlySpan<char> text);
-    void Flush();
+    void Clear();
     Size GetSize();
+    void Write(IEnumerable<(int x, int y, Cell cell)> updates);
+    void Flush();
 }
 
 public sealed class Terminal : ITerminal
@@ -29,29 +29,57 @@ public sealed class Terminal : ITerminal
     public void Dispose()
     {
         WriteAndFlush("\e[?1049l");
+        WriteAndFlush("\e[?25h");
     }
 
-    public void Write(char text)
+    public void Write(IEnumerable<(int x, int y, Cell cell)> updates)
     {
-        _buffer.Append(text);
-    }
+        var lastPosition = default(Position?);
 
-    public void Write(ReadOnlySpan<char> text)
-    {
-        _buffer.Append(text.ToArray());
+        foreach (var (x, y, cell) in updates)
+        {
+            if (lastPosition == null || !(x == lastPosition.Value.X + 1 && y == lastPosition.Value.Y))
+            {
+                MoveTo(x, y);
+            }
+
+            lastPosition = new Position(x, y);
+            Write((char)cell.Rune.Value);
+        }
     }
 
     public void Flush()
     {
-        byte[] utf8 = Encoding.UTF8.GetBytes(_buffer.ToString());
-        write(1, utf8, utf8.Length);
+        var lol = _buffer.ToString();
+        var utf8 = Encoding.UTF8.GetBytes(lol);
+        var _ = write(1, utf8, utf8.Length);
         _buffer.Clear();
+    }
+
+    public void Clear()
+    {
+        Write("\e[2J");
     }
 
     public Size GetSize()
     {
         // TODO: Use ioctl with TIOCGWINSZ
         return new Size(Console.WindowWidth, Console.WindowHeight);
+    }
+
+    private void MoveTo(int x, int y)
+    {
+        Write($"\e[{y};{x}H");
+    }
+
+    private void Write(char text)
+    {
+        _buffer.Append(text);
+    }
+
+    private void Write(ReadOnlySpan<char> text)
+    {
+        _buffer.Append(text.ToArray());
     }
 
     private void WriteAndFlush(ReadOnlySpan<char> text)

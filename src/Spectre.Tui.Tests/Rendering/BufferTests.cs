@@ -67,6 +67,7 @@ public sealed class BufferTests
         var cell = buffer.GetCell(5, 5);
 
         // Then
+        cell.ShouldNotBeNull();
         cell.Rune.ShouldBe(new Rune('z'));
     }
 
@@ -100,7 +101,7 @@ public sealed class BufferTests
         var cell = buffer.GetCell(x, y);
 
         // Then
-        cell.Rune.ShouldBe(new Rune(' '));
+        cell.ShouldBe(null);
     }
 
     [Fact]
@@ -113,7 +114,7 @@ public sealed class BufferTests
         buffer.SetCell(5, 5, new Cell { Rune = new Rune('x'), });
 
         // Then
-        buffer.GetCell(5, 5).Rune
+        buffer.GetCell(5, 5)!.Rune
             .ShouldBe(new Rune('x'));
     }
 

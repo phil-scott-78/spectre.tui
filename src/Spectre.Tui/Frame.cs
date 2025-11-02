@@ -13,12 +13,12 @@ public sealed class Frame
     public void Render<T>(T widget)
         where T : IWidget
     {
-        widget.Render(ViewPort, Buffer);
+        Buffer.Render(widget, ViewPort);
     }
 
     public void Render<T, TState>(T widget, TState state)
         where T : IWidget<TState>
     {
-        widget.Render(ViewPort, state, Buffer);
+        Buffer.Render(widget, ViewPort, state);
     }
 }

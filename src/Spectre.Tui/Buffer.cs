@@ -4,9 +4,9 @@ namespace Spectre.Tui;
 
 public sealed class Buffer
 {
-    public Region Region { get; }
-    public Cell[] Cells { get; }
-    public int Length { get; }
+    public Region Region { get; private set; }
+    public Cell[] Cells { get; private set; }
+    public int Length { get; private set; }
 
     private Buffer(Region region, Cell[] cells)
     {
@@ -52,17 +52,17 @@ public sealed class Buffer
         return Cells[index];
     }
 
-    public Cell GetCell(int x, int y)
+    public Cell? GetCell(int x, int y)
     {
         if (x < 0 || y < 0 || x >= Region.Width || y >= Region.Height)
         {
-            return new Cell();
+            return null;
         }
 
         var index = (y * Region.Width) + x;
         if (index >= Length)
         {
-            return new Cell();
+            return null;
         }
 
         return Cells[index];
@@ -90,49 +90,39 @@ public sealed class Buffer
         widget.Render(area, this);
     }
 
-    public void Render<T, TState>(T widget, TState state, Region area)
+    public void Render<T, TState>(T widget, Region area, TState state)
         where T : IWidget<TState>
     {
-        widget.Render(area, state, this);
-    }
-}
-
-file sealed class BufferEnumerator : IEnumerator<(int x, int y, Cell cell)>
-{
-    private readonly Buffer _buffer;
-    private (int x, int y, Cell cell)? _current;
-    private int _index = -1;
-
-    object? IEnumerator.Current => _current!;
-    (int x, int y, Cell cell) IEnumerator<(int x, int y, Cell cell)>.Current => _current!.Value;
-
-    public BufferEnumerator(Buffer buffer)
-    {
-        _buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
-    }
-
-    public bool MoveNext()
-    {
-        if (_index >= _buffer.Length - 1)
-        {
-            return false;
-        }
-
-        _index++;
-
-        var x = _index % _buffer.Region.Width;
-        var y = _index / _buffer.Region.Height;
-
-        _current = (x, y, _buffer.GetCell(_index));
-        return true;
+        widget.Render(area,this, state);
     }
 
     public void Reset()
     {
-        _index = 0;
+        Array.Fill(Cells, new Cell());
     }
 
-    public void Dispose()
+    public void Resize(Region area)
     {
+        var cells = new Cell[area.Area];
+        Array.Fill(cells, new Cell());
+
+        Cells = cells;
+        Region = area;
+        Length = Region.Area;
+    }
+
+    public IEnumerable<(int x, int y, Cell)> Diff(Buffer other)
+    {
+        foreach (var (index, (current, previous)) in other.Cells.Zip(Cells).Index())
+        {
+            if (current.Equals(previous))
+            {
+                continue;
+            }
+
+            var x = (index % Region.Width) + Region.X;
+            var y = (index / Region.Width) + Region.Y;
+            yield return (x, y, current);
+        }
     }
 }

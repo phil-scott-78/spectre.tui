@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using Spectre.Tui;
 using Spectre.Tui.Terminal;
@@ -19,7 +20,8 @@ public static class Program
                 state.Update(elapsed);
 
                 frame.Render(new Box(state.Invert));
-                frame.Render(new CenteredText("FPS:" + state.Fps));
+                frame.Render(new CenteredText(state.Fps.ToString(CultureInfo.InvariantCulture)));
+                frame.Render(new CenteredText($"{frame.ViewPort}", offset: 1));
             });
 
             if (Console.KeyAvailable)
@@ -80,12 +82,12 @@ public sealed class Box(bool invert) : IWidget
     }
 }
 
-public sealed class CenteredText(string text) : IWidget
+public sealed class CenteredText(string text, int offset = 0) : IWidget
 {
     public void Render(Region area, Spectre.Tui.Buffer buffer)
     {
         var x = (area.Width - text.Length) / 2;
-        var y = area.Height / 2;
+        var y = area.Height / 2 + offset;
 
         foreach (var (a, b) in text.Select((a, b) => (a, b)))
         {

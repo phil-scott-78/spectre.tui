@@ -7,5 +7,5 @@ public interface IWidget
 
 public interface IWidget<in TState>
 {
-    void Render(Region area, TState state, Buffer buffer);
+    void Render(Region area, Buffer buffer, TState state);
 }

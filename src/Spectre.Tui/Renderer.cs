@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices.Swift;
+using System.Text;
 using Spectre.Tui.Terminal;
 
 namespace Spectre.Tui;
@@ -6,17 +8,24 @@ namespace Spectre.Tui;
 public class Renderer
 {
     private readonly ITerminal _terminal;
-    private readonly Buffer _buffer;
     private readonly Stopwatch _stopwatch;
+    private readonly Buffer[] _buffers;
     private TimeSpan _lastUpdate;
+    private int _bufferIndex;
+    private Region _viewport;
 
     public Renderer(ITerminal terminal)
     {
         _terminal = terminal ?? throw new ArgumentNullException(nameof(terminal));
-        _buffer = Buffer.Empty(_terminal.GetSize());
-        _stopwatch = new Stopwatch();
         _lastUpdate = TimeSpan.Zero;
+        _viewport = _terminal.GetSize().ToRegion();
+        _buffers =
+        [
+            Buffer.Empty(_viewport),
+            Buffer.Empty(_viewport)
+        ];
 
+        _stopwatch = new Stopwatch();
         _stopwatch.Start();
     }
 
@@ -25,36 +34,51 @@ public class Renderer
         var elapsed = _stopwatch.Elapsed - _lastUpdate;
         _lastUpdate = _stopwatch.Elapsed;
 
-        // Set the cursor position
-        _terminal.Write("\e[H");
+        // Resize the buffers
+        Resize();
 
         // Fill out the current frame
-        var frame = new Frame(_buffer);
+        var frame = new Frame(_buffers[_bufferIndex]);
         callback(frame, elapsed);
 
+        // Calculate the diff between the back and front buffer
+        var prev = _buffers[1 - _bufferIndex];
+        var curr = _buffers[_bufferIndex];
+        var diff = prev.Diff(curr);
+
         // Render the current frame
-        var x = 0;
-        var y = 0;
-        foreach (var cell in frame.Buffer.Cells)
-        {
-            _terminal.Write((char)cell.Rune.Value);
+        _terminal.Write(diff);
 
-            x++;
-            if (x != frame.ViewPort.Right)
-            {
-                continue;
-            }
-
-            y++;
-            x = 0;
-
-            if (y != frame.ViewPort.Bottom)
-            {
-                _terminal.Write("\eE");
-            }
-        }
+        // Swap the buffers
+        SwapBuffers();
 
         // Flush the backend
         _terminal.Flush();
+    }
+
+    private void Resize()
+    {
+        var area = _terminal.GetSize().ToRegion();
+        if (area.Equals(_viewport))
+        {
+            return;
+        }
+
+        // Reset buffer
+        _buffers[_bufferIndex].Resize(area);
+        _buffers[1 - _bufferIndex].Resize(area);
+        _viewport = area;
+
+        // Clear the terminal
+        _terminal.Clear();
+
+        // Reset the back buffer
+        _buffers[1 - _bufferIndex].Reset();
+    }
+
+    private void SwapBuffers()
+    {
+        _buffers[1 - _bufferIndex].Reset();
+        _bufferIndex = 1 - _bufferIndex;
     }
 }
