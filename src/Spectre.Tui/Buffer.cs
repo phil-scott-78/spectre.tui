@@ -66,7 +66,7 @@ public sealed class Buffer
     public void Render<T, TState>(T widget, Region area, TState state)
         where T : IWidget<TState>
     {
-        widget.Render(area,this, state);
+        widget.Render(area, this, state);
     }
 
     public void Reset()

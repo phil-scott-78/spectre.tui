@@ -69,7 +69,7 @@ public sealed class Terminal : ITerminal
 
     private void MoveTo(int x, int y)
     {
-        Write($"\e[{y+1};{x+1}H");
+        Write($"\e[{y + 1};{x + 1}H");
     }
 
     private void WriteAndFlush(ReadOnlySpan<char> text)
