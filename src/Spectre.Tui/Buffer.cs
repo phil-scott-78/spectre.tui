@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace Spectre.Tui;
 
 public sealed class Buffer
@@ -42,14 +40,10 @@ public sealed class Buffer
         return new Buffer(area, cells);
     }
 
-    public Cell GetCell(int index)
+    public Cell? GetCell(int index)
     {
-        if (index < 0 || index >= Length)
-        {
-            return new Cell();
-        }
-
-        return Cells[index];
+        return index < 0 || index >= Length
+            ? null : Cells[index];
     }
 
     public Cell? GetCell(int x, int y)
@@ -60,28 +54,7 @@ public sealed class Buffer
         }
 
         var index = (y * Region.Width) + x;
-        if (index >= Length)
-        {
-            return null;
-        }
-
-        return Cells[index];
-    }
-
-    public void SetCell(int x, int y, Cell cell)
-    {
-        if (x < 0 || y < 0 || x >= Region.Width || y >= Region.Height)
-        {
-            return;
-        }
-
-        var index = (y * Region.Width) + x;
-        if (index >= Length)
-        {
-            return;
-        }
-
-        Cells[index] = cell;
+        return index >= Length ? null : Cells[index];
     }
 
     public void Render<T>(T widget, Region area)

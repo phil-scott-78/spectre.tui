@@ -83,7 +83,7 @@ public sealed class BufferTests
         var cell = buffer.GetCell(10);
 
         // Then
-        cell.Rune.ShouldBe(new Rune('z'));
+        cell!.Rune.ShouldBe(new Rune('z'));
     }
 
     [Theory]
@@ -111,23 +111,11 @@ public sealed class BufferTests
         var buffer = Buffer.Empty(new Size(10, 10));
 
         // When
-        buffer.SetCell(5, 5, new Cell { Rune = new Rune('x'), });
+        buffer.GetCell(5, 5)!
+            .SetRune(new Rune('x'));
 
         // Then
         buffer.GetCell(5, 5)!.Rune
             .ShouldBe(new Rune('x'));
-    }
-
-    [Theory]
-    [InlineData(-1, 5)]
-    [InlineData(15, 5)]
-    [InlineData(5, 15)]
-    public void Should_Not_Throw_If_Setting_Cell_Out_Of_Bounds(int x, int y)
-    {
-        // Given
-        var buffer = Buffer.Empty(new Size(10, 10));
-
-        // When, Then
-        buffer.SetCell(x, y, new Cell { Rune = new Rune('x'), });
     }
 }

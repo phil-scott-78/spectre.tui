@@ -1,7 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices.Swift;
-using System.Text;
-using Spectre.Tui.Terminal;
 
 namespace Spectre.Tui;
 

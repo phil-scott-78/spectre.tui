@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Spectre.Tui.Terminal;
+namespace Spectre.Tui;
 
 public interface ITerminal : IDisposable
 {
@@ -72,6 +72,12 @@ public sealed class Terminal : ITerminal
         Write($"\e[{y+1};{x+1}H");
     }
 
+    private void WriteAndFlush(ReadOnlySpan<char> text)
+    {
+        Write(text);
+        Flush();
+    }
+
     private void Write(char text)
     {
         _buffer.Append(text);
@@ -80,11 +86,5 @@ public sealed class Terminal : ITerminal
     private void Write(ReadOnlySpan<char> text)
     {
         _buffer.Append(text.ToArray());
-    }
-
-    private void WriteAndFlush(ReadOnlySpan<char> text)
-    {
-        Write(text);
-        Flush();
     }
 }
