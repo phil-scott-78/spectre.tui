@@ -36,7 +36,7 @@ public readonly struct Region(int x, int y, int width, int height)
                position.Y >= Y && position.Y <= Y + Height;
     }
 
-    public bool Intersects(ref Region value)
+    public bool Intersects(Region value)
     {
         return value.Left < Right && Left < value.Right &&
                value.Top < Bottom && Top < value.Bottom;
@@ -71,7 +71,7 @@ public readonly struct Region(int x, int y, int width, int height)
         );
     }
 
-    public Region Union(ref Region other)
+    public Region Union(Region other)
     {
         var x = Math.Min(X, other.X);
         var y = Math.Min(Y, other.Y);

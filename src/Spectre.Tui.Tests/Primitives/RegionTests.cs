@@ -92,10 +92,10 @@ public sealed class RegionTests
         {
             // Given
             var region = new Region(1, 2, 5, 10);
-            var other = new Region(3, 4, 15, 20);
 
             // When
-            var result = region.Union(ref other);
+            var result = region.Union(
+                new Region(3, 4, 15, 20));
 
             // Then
             result.ShouldBe(
