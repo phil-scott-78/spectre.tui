@@ -16,6 +16,15 @@ public sealed class Cell : IEquatable<Cell>
 
     public Decoration Decoration { get; init; } = Decoration.None;
 
+    public Cell Clone()
+    {
+        return new Cell
+        {
+            Rune = Rune,
+            Decoration = Decoration,
+        };
+    }
+
     public bool Equals(Cell? other)
     {
         if (other is null)

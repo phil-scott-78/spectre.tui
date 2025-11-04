@@ -36,14 +36,19 @@ public sealed class Buffer
     public static Buffer Filled(Region area, Cell cell)
     {
         var cells = new Cell[area.Area];
-        Array.Fill(cells, cell);
+        for (var i = 0; i < cells.Length; i++)
+        {
+            cells[i] = cell.Clone();
+        }
+
         return new Buffer(area, cells);
     }
 
     public Cell? GetCell(int index)
     {
         return index < 0 || index >= Length
-            ? null : Cells[index];
+            ? null
+            : Cells[index];
     }
 
     public Cell? GetCell(int x, int y)
@@ -71,13 +76,13 @@ public sealed class Buffer
 
     public void Reset()
     {
-        Array.Fill(Cells, new Cell());
+        Filled(Region, new Cell());
     }
 
     public void Resize(Region area)
     {
         var cells = new Cell[area.Area];
-        Array.Fill(cells, new Cell());
+        Filled(Region, new Cell());
 
         Cells = cells;
         Region = area;
