@@ -1,60 +1,17 @@
 using System.Diagnostics;
-using System.Text;
 
 namespace Spectre.Tui;
 
 [DebuggerDisplay("{DebuggerDisplay(),nq}")]
-public sealed class Cell : IEquatable<Cell>
+public record struct Cell
 {
-    private Rune _rune = new(' ');
-
-    public Rune Rune
+    public Cell()
     {
-        get => _rune;
-        init => _rune = value;
+        Rune = default;
     }
 
-    public Decoration Decoration { get; init; } = Decoration.None;
-
-    public Cell Clone()
-    {
-        return new Cell
-        {
-            Rune = Rune,
-            Decoration = Decoration,
-        };
-    }
-
-    public bool Equals(Cell? other)
-    {
-        if (other is null)
-        {
-            return false;
-        }
-
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        return Rune.Equals(other.Rune) &&
-               Decoration == other.Decoration;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return ReferenceEquals(this, obj) || (obj is Cell other && Equals(other));
-    }
-
-    public void SetRune(Rune rune)
-    {
-        _rune = rune;
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Rune, (int)Decoration);
-    }
+    public Rune Rune { get; set; }
+    public Decoration Decoration { get; set; } = Decoration.None;
 
     private string DebuggerDisplay()
     {

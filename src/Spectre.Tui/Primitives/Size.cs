@@ -7,9 +7,9 @@ public readonly struct Size(int width, int height) : IEquatable<Size>
 
     public int Area => Width * Height;
 
-    public Region ToRegion()
+    public Rectangle ToRectangle()
     {
-        return new Region(0, 0, Width, Height);
+        return new Rectangle(0, 0, Width, Height);
     }
 
     public bool Equals(Size other)

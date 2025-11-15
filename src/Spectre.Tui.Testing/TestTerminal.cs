@@ -35,20 +35,21 @@ public sealed class TestTerminal : ITerminal
     {
         var items = updates.ToArray();
 
+        // Write updates
         foreach (var (x, y, cell) in items)
         {
             var index = (y * _size.Width) + x;
             _buffer[index] = (char)cell.Rune.Value;
         }
 
+        // Write empty spaces (to make it easier to read)
         for (var y = 0; y < _size.Height; y++)
         {
             for (var x = 0; x < _size.Width; x++)
             {
                 if (!items.Any(item => item.x == x && item.y == y))
                 {
-                    var index = (y * _size.Width) + x;
-                    _buffer[index] = '?';
+                    _buffer[(y * _size.Width) + x] = '?';
                 }
             }
         }

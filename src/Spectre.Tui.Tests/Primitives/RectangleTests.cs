@@ -2,13 +2,13 @@ using Shouldly;
 
 namespace Spectre.Tui.Tests;
 
-public sealed class RegionTests
+public sealed class RectangleTests
 {
     [Fact]
     public void Should_Assign_Properties_Correctly()
     {
         // Given, When
-        var rect = new Region(1, 2, 3, 4);
+        var rect = new Rectangle(1, 2, 3, 4);
 
         // Then
         rect.X.ShouldBe(1);
@@ -25,7 +25,7 @@ public sealed class RegionTests
     public void Should_Deconstruct_As_Expected()
     {
         // Given
-        var region = new Region(1, 2, 5, 10);
+        var region = new Rectangle(1, 2, 5, 10);
 
         // When
         var (x, y, width, height) = region;
@@ -43,28 +43,28 @@ public sealed class RegionTests
         public void Should_Inflate_Region_With_Expected_Size()
         {
             // Given
-            var region = new Region(1, 2, 5, 10);
+            var region = new Rectangle(1, 2, 5, 10);
 
             // When
             var result = region.Inflate(2, 3);
 
             // Then
             result.ShouldBe(
-                new Region(-1, -1, 9, 16));
+                new Rectangle(-1, -1, 9, 16));
         }
 
         [Fact]
         public void Should_Deflate_Region_With_Expected_Size_If_Size_Is_Negative()
         {
             // Given
-            var region = new Region(1, 2, 5, 10);
+            var region = new Rectangle(1, 2, 5, 10);
 
             // When
             var result = region.Inflate(-1, -2);
 
             // Then
             result.ShouldBe(
-                new Region(2, 4, 3, 6));
+                new Rectangle(2, 4, 3, 6));
         }
     }
 
@@ -74,14 +74,14 @@ public sealed class RegionTests
         public void Should_Offset_Region()
         {
             // Given
-            var region = new Region(1, 2, 5, 10);
+            var region = new Rectangle(1, 2, 5, 10);
 
             // When
             var result = region.Offset(2, 3);
 
             // Then
             result.ShouldBe(
-                new Region(3, 5, 5, 10));
+                new Rectangle(3, 5, 5, 10));
         }
     }
 
@@ -91,15 +91,15 @@ public sealed class RegionTests
         public void Should_Offset_Region()
         {
             // Given
-            var region = new Region(1, 2, 5, 10);
+            var region = new Rectangle(1, 2, 5, 10);
 
             // When
             var result = region.Union(
-                new Region(3, 4, 15, 20));
+                new Rectangle(3, 4, 15, 20));
 
             // Then
             result.ShouldBe(
-                new Region(1, 2, 17, 22));
+                new Rectangle(1, 2, 17, 22));
         }
     }
 }

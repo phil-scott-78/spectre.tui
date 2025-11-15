@@ -9,13 +9,13 @@ public class Renderer
     private readonly Buffer[] _buffers;
     private TimeSpan _lastUpdate;
     private int _bufferIndex;
-    private Region _viewport;
+    private Rectangle _viewport;
 
     public Renderer(ITerminal terminal)
     {
         _terminal = terminal ?? throw new ArgumentNullException(nameof(terminal));
         _lastUpdate = TimeSpan.Zero;
-        _viewport = _terminal.GetSize().ToRegion();
+        _viewport = _terminal.GetSize().ToRectangle();
         _buffers =
         [
             Buffer.Empty(_viewport),
@@ -26,7 +26,7 @@ public class Renderer
         _stopwatch.Start();
     }
 
-    public void Draw(Action<Frame, TimeSpan> callback)
+    public void Draw(Action<IRendererContext, TimeSpan> callback)
     {
         var elapsed = _stopwatch.Elapsed - _lastUpdate;
         _lastUpdate = _stopwatch.Elapsed;
@@ -35,7 +35,7 @@ public class Renderer
         Resize();
 
         // Fill out the current frame
-        var frame = new Frame(_buffers[_bufferIndex]);
+        var frame = new RenderContext(_buffers[_bufferIndex], _viewport, _viewport);
         callback(frame, elapsed);
 
         // Calculate the diff between the back and front buffer
@@ -55,7 +55,7 @@ public class Renderer
 
     private void Resize()
     {
-        var area = _terminal.GetSize().ToRegion();
+        var area = _terminal.GetSize().ToRectangle();
         if (area.Equals(_viewport))
         {
             return;

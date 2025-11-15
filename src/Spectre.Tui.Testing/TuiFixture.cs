@@ -21,7 +21,7 @@ public sealed class TuiFixture
         return _terminal.Output;
     }
 
-    public string Render(Action<Frame> action)
+    public string Render(Action<IRendererContext> action)
     {
         _renderer.Draw((frame, _) =>
         {

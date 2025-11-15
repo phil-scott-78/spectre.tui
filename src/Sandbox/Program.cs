@@ -1,3 +1,4 @@
+using System.Text;
 using Spectre.Tui;
 
 namespace Sandbox;
@@ -13,14 +14,21 @@ public static class Program
 
         while (running)
         {
-            renderer.Draw((_, _) =>
+            renderer.Draw((ctx, _) =>
             {
-                // Time to quit?
-                if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Q)
-                {
-                    running = false;
-                }
+                // Clear the background
+                ctx.Render(new ClearWidget(new Rune('▄')));
+
+                // Render a box
+                var inner = ctx.Viewport.Inflate(new Size(-5, -5));
+                ctx.Render(new BoxWidget(), inner);
             });
+
+            // Time to quit?
+            if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Q)
+            {
+                running = false;
+            }
         }
     }
 }

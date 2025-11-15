@@ -1,4 +1,3 @@
-using System.Text;
 using Shouldly;
 using Spectre.Tui.Testing;
 
@@ -8,13 +7,11 @@ public sealed class RendererTests
 {
     private sealed class TestTextWidget(int x, int y, string text) : IWidget
     {
-        public void Render(Region area, Buffer buffer)
+        public void Render(IRendererContext context)
         {
             for (var i = 0; i < text.Length; i++)
             {
-                buffer
-                    .GetCell(x + i, y)?
-                    .SetRune(new Rune(text[i]));
+                context.SetRune(x + i, y, text[i]);
             }
         }
     }

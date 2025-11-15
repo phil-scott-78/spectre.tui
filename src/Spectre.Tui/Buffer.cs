@@ -1,16 +1,16 @@
 namespace Spectre.Tui;
 
-public sealed class Buffer
+internal sealed class Buffer
 {
-    public Region Region { get; private set; }
+    public Rectangle Screen { get; private set; }
     public Cell[] Cells { get; private set; }
     public int Length { get; private set; }
 
-    private Buffer(Region region, Cell[] cells)
+    internal Buffer(Rectangle screen, Cell[] cells)
     {
-        Region = region;
+        Screen = screen;
         Cells = cells ?? throw new ArgumentNullException(nameof(cells));
-        Length = region.Area;
+        Length = screen.CalculateArea();
 
         if (Length != Cells.Length)
         {
@@ -18,89 +18,89 @@ public sealed class Buffer
         }
     }
 
-    public static Buffer Empty(Size size)
-    {
-        return Empty(new Region(0, 0, size.Width, size.Height));
-    }
-
-    public static Buffer Empty(Region region)
-    {
-        return Filled(region, new Cell());
-    }
-
-    public static Buffer Filled(Size size, Cell cell)
-    {
-        return Filled(new Region(0, 0, size.Width, size.Height), cell);
-    }
-
-    public static Buffer Filled(Region area, Cell cell)
-    {
-        var cells = new Cell[area.Area];
-        for (var i = 0; i < cells.Length; i++)
-        {
-            cells[i] = cell.Clone();
-        }
-
-        return new Buffer(area, cells);
-    }
-
-    public Cell? GetCell(int index)
+    public Cell GetCell(int index)
     {
         return index < 0 || index >= Length
-            ? null
+            ? default
             : Cells[index];
     }
 
-    public Cell? GetCell(int x, int y)
+    public Cell GetCell(int x, int y)
     {
-        if (x < 0 || y < 0 || x >= Region.Width || y >= Region.Height)
+        if (x < 0 || y < 0 || x >= Screen.Width || y >= Screen.Height)
         {
-            return null;
+            return default;
         }
 
-        var index = (y * Region.Width) + x;
-        return index >= Length ? null : Cells[index];
+        return Cells[(y * Screen.Width) + x];
     }
 
-    public void Render<T>(T widget, Region area)
-        where T : IWidget
+    public void SetRune(int x, int y, Rune rune)
     {
-        widget.Render(area, this);
+        TrySetRune(x, y, rune, out _);
     }
 
-    public void Render<T, TState>(T widget, Region area, TState state)
-        where T : IWidget<TState>
+    private bool TrySetRune(int x, int y, Rune rune, out bool moveForward)
     {
-        widget.Render(area, this, state);
+        var index = (y * Screen.Width) + x;
+        if (index < 0 || index >= Cells.Length)
+        {
+            moveForward = false;
+            return false;
+        }
+
+        Cells[index].Rune = rune;
+        moveForward = true;
+        return true;
     }
 
     public void Reset()
     {
-        Filled(Region, new Cell());
+        var cells = new Cell[Screen.CalculateArea()];
+        Array.Fill(cells, new Cell());
+        Cells = cells;
     }
 
-    public void Resize(Region area)
+    public void Resize(Rectangle area)
     {
-        var cells = new Cell[area.Area];
-        Filled(Region, new Cell());
+        var cells = new Cell[area.CalculateArea()];
+        Array.Fill(cells, new Cell());
 
         Cells = cells;
-        Region = area;
-        Length = Region.Area;
+        Screen = area;
+        Length = Screen.CalculateArea();
     }
 
     public IEnumerable<(int x, int y, Cell)> Diff(Buffer other)
     {
         foreach (var (index, (current, previous)) in other.Cells.Zip(Cells).Index())
         {
-            if (current.Equals(previous))
+            if (current.Equals(previous) || current == default)
             {
                 continue;
             }
 
-            var x = (index % Region.Width) + Region.X;
-            var y = (index / Region.Width) + Region.Y;
+            var x = (index % Screen.Width) + Screen.X;
+            var y = (index / Screen.Width) + Screen.Y;
             yield return (x, y, current);
+        }
+    }
+}
+
+internal static class BufferExtensions
+{
+    extension(Buffer)
+    {
+        public static Buffer Empty(Rectangle region)
+        {
+            return Filled(region, new Cell());
+        }
+
+        public static Buffer Filled(Rectangle area, Cell cell)
+        {
+            var cells = new Cell[area.CalculateArea()];
+            Array.Fill(cells, cell);
+            return new Buffer(area, cells);
         }
     }
 }

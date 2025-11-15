@@ -1,7 +1,9 @@
+using System.Runtime.CompilerServices;
+
 namespace Spectre.Tui;
 
-public readonly struct Region(int x, int y, int width, int height)
-    : IEquatable<Region>
+public readonly struct Rectangle(int x, int y, int width, int height)
+    : IEquatable<Rectangle>
 {
     public int X { get; } = x;
     public int Y { get; } = y;
@@ -13,16 +15,14 @@ public readonly struct Region(int x, int y, int width, int height)
     public int Left => X;
     public int Right => X + Width;
 
-    public int Area => Width * Height;
-
-    public bool Equals(Region other)
+    public bool Equals(Rectangle other)
     {
         return X == other.X && Y == other.Y && Width == other.Width && Height == other.Height;
     }
 
     public override bool Equals(object? obj)
     {
-        return obj is Region other && Equals(other);
+        return obj is Rectangle other && Equals(other);
     }
 
     public override int GetHashCode()
@@ -30,26 +30,39 @@ public readonly struct Region(int x, int y, int width, int height)
         return HashCode.Combine(X, Y, Width, Height);
     }
 
+    public int CalculateArea()
+    {
+        return Width * Height;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Contains(Position position)
     {
         return position.X >= X && position.X <= X + Width &&
                position.Y >= Y && position.Y <= Y + Height;
     }
 
-    public bool Intersects(Region value)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Contains(int x, int y)
+    {
+        return x >= X && x <= X + Width &&
+               y >= Y && y <= Y + Height;
+    }
+
+    public bool Intersects(Rectangle value)
     {
         return value.Left < Right && Left < value.Right &&
                value.Top < Bottom && Top < value.Bottom;
     }
 
-    public Region Inflate(Size size)
+    public Rectangle Inflate(Size size)
     {
         return Inflate(size.Width, size.Height);
     }
 
-    public Region Inflate(int width, int height)
+    public Rectangle Inflate(int width, int height)
     {
-        return new Region(
+        return new Rectangle(
             x: X - width,
             y: Y - height,
             width: Width + (2 * width),
@@ -57,25 +70,40 @@ public readonly struct Region(int x, int y, int width, int height)
         );
     }
 
-    public Region Offset(Position offset)
+    public Rectangle Offset(Position offset)
     {
         return Offset(offset.X, offset.Y);
     }
 
-    public Region Offset(int offsetX, int offsetY)
+    public static Rectangle Intersect(ref Rectangle first, ref Rectangle second)
     {
-        return new Region(
+        if (!first.Intersects(second))
+        {
+            throw new InvalidOperationException("The two rectangles do not intersect");
+        }
+
+        var right = Math.Min(first.X + first.Width, second.X + second.Width);
+        var left = Math.Max(first.X, second.X);
+        var top = Math.Max(first.Y, second.Y);
+        var bottom = Math.Min(first.Y + first.Height, second.Y + second.Height);
+
+        return new Rectangle(left, top, right - left, bottom - top);
+    }
+
+    public Rectangle Offset(int offsetX, int offsetY)
+    {
+        return new Rectangle(
             x: X + offsetX,
             y: Y + offsetY,
             Width, Height
         );
     }
 
-    public Region Union(Region other)
+    public Rectangle Union(Rectangle other)
     {
         var x = Math.Min(X, other.X);
         var y = Math.Min(Y, other.Y);
-        return new Region(x, y,
+        return new Rectangle(x, y,
             Math.Max(Right, other.Right) - x,
             Math.Max(Bottom, other.Bottom) - y);
     }
@@ -88,12 +116,12 @@ public readonly struct Region(int x, int y, int width, int height)
         height = Height;
     }
 
-    public static bool operator ==(Region left, Region right)
+    public static bool operator ==(Rectangle left, Rectangle right)
     {
         return left.Equals(right);
     }
 
-    public static bool operator !=(Region left, Region right)
+    public static bool operator !=(Rectangle left, Rectangle right)
     {
         return !(left == right);
     }
