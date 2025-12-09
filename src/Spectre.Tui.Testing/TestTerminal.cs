@@ -6,15 +6,18 @@ public sealed class TestTerminal : ITerminal
 {
     private readonly Size _size;
     private readonly char[] _buffer;
+    private int _position;
 
+    public bool SupportsAnsi { get; set; }
     public string Output { get; private set; } = "[Terminal buffer not flushed]";
 
     public TestTerminal(Size? size)
     {
         _size = size ?? new Size(80, 25);
         _buffer = new char[_size.Area];
+        _position = 0;
 
-        Array.Fill(_buffer, ' ');
+        Array.Fill(_buffer, '•');
     }
 
     public void Dispose()
@@ -23,7 +26,8 @@ public sealed class TestTerminal : ITerminal
 
     public void Clear()
     {
-        Array.Fill(_buffer, ' ');
+        Array.Fill(_buffer, '•');
+        _position = 0;
     }
 
     public Size GetSize()
@@ -31,33 +35,30 @@ public sealed class TestTerminal : ITerminal
         return _size;
     }
 
-    public void Write(IEnumerable<(int x, int y, Cell cell)> updates)
+    public void MoveTo(int x, int y)
     {
-        var items = updates.ToArray();
-
-        // Write updates
-        foreach (var (x, y, cell) in items)
-        {
-            var index = (y * _size.Width) + x;
-            _buffer[index] = (char)cell.Rune.Value;
-        }
-
-        // Write empty spaces (to make it easier to read)
-        for (var y = 0; y < _size.Height; y++)
-        {
-            for (var x = 0; x < _size.Width; x++)
-            {
-                if (!items.Any(item => item.x == x && item.y == y))
-                {
-                    _buffer[(y * _size.Width) + x] = '?';
-                }
-            }
-        }
+        _position = (y * _size.Width) + x;
     }
+
+    public void Write(Cell cell)
+    {
+        _buffer[_position] = (char)cell.Rune.Value;
+        _position++;
+    }
+
+    // public void Write(ReadOnlySpan<char> span)
+    // {
+    //     foreach (var character in span)
+    //     {
+    //         _buffer[_position] = character;
+    //         _position++;
+    //     }
+    // }
 
     public void Flush()
     {
         Output = Render();
+        Clear();
     }
 
     private string Render()

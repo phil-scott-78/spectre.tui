@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Spectre.Tui;
 
-public sealed class Terminal
+public static class Terminal
 {
     public static ITerminal Create()
     {

@@ -16,8 +16,4 @@
     <PackageReference Include="Wcwidth.Sources" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Widgets\" />
-  </ItemGroup>
-
 </Project>

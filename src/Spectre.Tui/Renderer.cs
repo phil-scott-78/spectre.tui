@@ -31,7 +31,7 @@ public sealed class Renderer
         var elapsed = _stopwatch.Elapsed - _lastUpdate;
         _lastUpdate = _stopwatch.Elapsed;
 
-        // Resize the buffers
+        // Resize the buffers (if needed)
         Resize();
 
         // Fill out the current frame
@@ -44,7 +44,18 @@ public sealed class Renderer
         var diff = prev.Diff(curr);
 
         // Render the current frame
-        _terminal.Write(diff);
+        var lastPosition = default(Position?);
+        foreach (var (x, y, cell) in diff)
+        {
+            // Do we need to move within the buffer?
+            if (lastPosition == null || !(x == lastPosition.Value.X + 1 && y == lastPosition.Value.Y))
+            {
+                _terminal.MoveTo(x, y);
+            }
+
+            lastPosition = new Position(x, y);
+            _terminal.Write(cell);
+        }
 
         // Swap the buffers
         SwapBuffers();

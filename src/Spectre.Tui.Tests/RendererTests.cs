@@ -24,17 +24,19 @@ public sealed class RendererTests
             new Size(11, 5));
 
         // When
-        var result = fixture.Render(
-            new TestTextWidget(5, 2, "1"));
+        var result = fixture.Render(frame =>
+        {
+            frame.Render(new TestTextWidget(3, 2, "Hello"));
+        });
 
         // Then
         result.ShouldBe(
             """
-            ???????????
-            ???????????
-            ?????1?????
-            ???????????
-            ???????????
+            •••••••••••
+            •••••••••••
+            •••Hello•••
+            •••••••••••
+            •••••••••••
             """);
     }
 
@@ -43,23 +45,23 @@ public sealed class RendererTests
     {
         // Given
         var fixture = new TuiFixture(new Size(11, 5));
-        fixture.Render(new TestTextWidget(2, 1, "Hello"));
+        fixture.Render(new TestTextWidget(3, 1, "Hello"));
 
         // When
         var result = fixture.Render(frame =>
         {
-            frame.Render(new TestTextWidget(2, 1, "Hello"));
-            frame.Render(new TestTextWidget(2, 2, "World"));
+            frame.Render(new TestTextWidget(3, 1, "Hello"));
+            frame.Render(new TestTextWidget(3, 2, "World"));
         });
 
         // Then
         result.ShouldBe(
             """
-            ???????????
-            ???????????
-            ??World????
-            ???????????
-            ???????????
+            •••••••••••
+            •••••••••••
+            •••World•••
+            •••••••••••
+            •••••••••••
             """);
     }
 }
