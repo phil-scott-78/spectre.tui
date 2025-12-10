@@ -1,3 +1,4 @@
 # `Spectre.Tui`
 
-Detailed instructions for using this library is located on the project website, https://spectreconsole.net
+This library is currently under construction and may change at any time.  
+Use it only if you’re comfortable with this.
