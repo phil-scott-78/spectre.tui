@@ -5,7 +5,7 @@ namespace Sandbox;
 
 public sealed class ClearWidget(Rune rune, Decoration decoration = Decoration.None) : IWidget
 {
-    public void Render(IRendererContext context)
+    public void Render(IRenderContext context)
     {
         for (var x = 0; x < context.Viewport.Width; x++)
         {

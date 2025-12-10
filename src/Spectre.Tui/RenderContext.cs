@@ -1,6 +1,6 @@
 namespace Spectre.Tui;
 
-public interface IRendererContext
+public interface IRenderContext
 {
     Rectangle Viewport { get; }
 
@@ -14,7 +14,7 @@ public interface IRendererContext
 
 public static class IRenderContextExtensions
 {
-    extension(IRendererContext context)
+    extension(IRenderContext context)
     {
         public void Render(IWidget widget)
         {
@@ -33,7 +33,7 @@ public static class IRenderContextExtensions
     }
 }
 
-internal sealed record RenderContext : IRendererContext
+internal sealed record RenderContext : IRenderContext
 {
     public Buffer Buffer { get; }
     public Rectangle Screen { get; private init; }

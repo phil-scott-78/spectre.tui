@@ -5,7 +5,7 @@ namespace Sandbox;
 
 public sealed class BoxWidget : IWidget
 {
-    public void Render(IRendererContext context)
+    public void Render(IRenderContext context)
     {
         var area = context.Viewport;
 

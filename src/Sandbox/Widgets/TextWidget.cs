@@ -4,7 +4,7 @@ namespace Sandbox;
 
 public sealed class TextWidget(string text) : IWidget
 {
-    public void Render(IRendererContext context)
+    public void Render(IRenderContext context)
     {
         text = $" FPS: {text} ";
 

@@ -26,7 +26,7 @@ public sealed class Renderer
         _stopwatch.Start();
     }
 
-    public void Draw(Action<IRendererContext, TimeSpan> callback)
+    public void Draw(Action<IRenderContext, TimeSpan> callback)
     {
         var elapsed = _stopwatch.Elapsed - _lastUpdate;
         _lastUpdate = _stopwatch.Elapsed;

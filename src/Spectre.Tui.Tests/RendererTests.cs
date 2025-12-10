@@ -7,7 +7,7 @@ public sealed class RendererTests
 {
     private sealed class TestTextWidget(int x, int y, string text) : IWidget
     {
-        public void Render(IRendererContext context)
+        public void Render(IRenderContext context)
         {
             for (var i = 0; i < text.Length; i++)
             {
