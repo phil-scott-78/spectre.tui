@@ -59,7 +59,7 @@ internal abstract class AnsiTerminal : ITerminal
 
     public void Write(Cell cell)
     {
-        Write(AnsiBuilder.GetAnsi(cell));
+        Write(AnsiBuilder.GetAnsi(ref cell, ColorSystem.TrueColor));
     }
 
     private void Write(ReadOnlySpan<char> text)

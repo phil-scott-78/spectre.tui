@@ -15,7 +15,7 @@ internal sealed class UnixTerminal : AnsiTerminal
     public override Size GetSize()
     {
         // TODO: Use ioctl with TIOCGWINSZ
-        return new Size(Console.WindowWidth, Console.WindowHeight);
+        return new Size(System.Console.WindowWidth, System.Console.WindowHeight);
     }
 
     protected override void Flush(string buffer)

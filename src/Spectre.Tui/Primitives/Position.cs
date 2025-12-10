@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Spectre.Tui;
 
 [DebuggerDisplay("{DebuggerDisplay(),nq}")]

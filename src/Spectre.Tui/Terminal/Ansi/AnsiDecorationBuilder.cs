@@ -1,22 +1,8 @@
 namespace Spectre.Tui;
 
-internal static class AnsiBuilder
+internal static class AnsiDecorationBuilder
 {
-    private const string Esc = "\e";
-    private const string Csi = Esc + "[";
-
-    public static string GetAnsi(Cell cell)
-    {
-        return $"{Sgr(GetAnsiCodes(cell.Decoration))}{cell.Rune}{Sgr(0)}";
-    }
-
-    private static string Sgr(params IEnumerable<byte> codes)
-    {
-        var joinedCodes = string.Join(";", codes.Select(c => c.ToString()));
-        return $"{Csi}{joinedCodes}m";
-    }
-
-    private static IEnumerable<byte> GetAnsiCodes(Decoration decoration)
+    public static IEnumerable<byte> GetAnsiCodes(Decoration decoration)
     {
         if ((decoration & Decoration.Bold) != 0)
         {

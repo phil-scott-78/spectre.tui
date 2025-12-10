@@ -3,7 +3,11 @@ using Spectre.Tui;
 
 namespace Sandbox;
 
-public sealed class ClearWidget(Rune rune, Decoration decoration = Decoration.None) : IWidget
+public sealed class ClearWidget(
+    Rune rune,
+    Decoration decoration = Decoration.None,
+    Color? foreground = null,
+    Color? background = null) : IWidget
 {
     public void Render(IRenderContext context)
     {
@@ -15,6 +19,8 @@ public sealed class ClearWidget(Rune rune, Decoration decoration = Decoration.No
                 {
                     Decoration = decoration,
                     Rune = rune,
+                    Foreground = foreground ?? Color.Default,
+                    Background = background ?? Color.Default,
                 });
             }
         }

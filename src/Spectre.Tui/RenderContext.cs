@@ -10,6 +10,8 @@ public interface IRenderContext
     /// Sets the cell at the specified (viewport) coordinates.
     /// </summary>
     void SetCell(int x, int y, Cell cell);
+
+    Cell GetCell(int x, int y);
 }
 
 public static class IRenderContextExtensions
@@ -28,7 +30,29 @@ public static class IRenderContextExtensions
 
         public void SetRune(int x, int y, Rune rune)
         {
-            context.SetCell(x, y, new Cell { Rune = rune });
+            var cell = context.GetCell(x, y);
+            context.SetCell(x, y, cell with
+            {
+                Rune = rune
+            });
+        }
+
+        public void SetForeground(int x, int y, Color? color)
+        {
+            color ??= Color.Default;
+            context.SetCell(x, y, context.GetCell(x, y) with
+            {
+                Foreground = color!.Value,
+            });
+        }
+
+        public void SetBackground(int x, int y, Color? color)
+        {
+            color ??= Color.Default;
+            context.SetCell(x, y, context.GetCell(x, y) with
+            {
+                Background = color!.Value,
+            });
         }
     }
 }
@@ -65,5 +89,10 @@ internal sealed record RenderContext : IRenderContext
     public void SetCell(int x, int y, Cell cell)
     {
         Buffer.SetCell(Screen.X + x, Screen.Y + y, cell);
+    }
+
+    public Cell GetCell(int x, int y)
+    {
+        return Buffer.GetCell(Screen.X + x, Screen.Y + y);
     }
 }
