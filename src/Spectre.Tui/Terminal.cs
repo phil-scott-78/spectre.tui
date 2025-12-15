@@ -6,11 +6,21 @@ public static class Terminal
 {
     public static ITerminal Create()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        // Do we support ANSI?
+        var (supportsAnsi, legacyWindowsTerm) = AnsiDetector.Detect(false, true);
+        if (!supportsAnsi || legacyWindowsTerm)
         {
-            return new WindowsTerminal();
+            throw new InvalidOperationException("The current terminal does not support VT codes");
         }
 
-        return new UnixTerminal();
+        // What colors do we support?
+        var colors = ColorSystemDetector.Detect();
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new WindowsTerminal(colors);
+        }
+
+        return new UnixTerminal(colors);
     }
 }

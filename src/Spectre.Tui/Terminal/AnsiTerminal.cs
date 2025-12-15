@@ -5,10 +5,12 @@ internal abstract class AnsiTerminal : ITerminal
     private readonly StringBuilder _buffer;
 
     public bool SupportsAnsi { get; protected set; } = true;
+    public ColorSystem ColorSystem { get; protected set; }
 
-    protected AnsiTerminal()
+    protected AnsiTerminal(ColorSystem colors)
     {
         _buffer = new StringBuilder();
+        ColorSystem = colors;
 
         Write("\e[?1049h\e[H");
         Write("\e[?25l");
@@ -59,7 +61,7 @@ internal abstract class AnsiTerminal : ITerminal
 
     public void Write(Cell cell)
     {
-        Write(AnsiBuilder.GetAnsi(ref cell, ColorSystem.TrueColor));
+        Write(AnsiBuilder.GetAnsi(ref cell, ColorSystem));
     }
 
     private void Write(ReadOnlySpan<char> text)

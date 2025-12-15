@@ -2,6 +2,11 @@ namespace Spectre.Tui;
 
 internal sealed class WindowsTerminal : AnsiTerminal
 {
+    public WindowsTerminal(ColorSystem colors)
+        : base(colors)
+    {
+    }
+
     protected override void Flush(string buffer)
     {
         System.Console.Write(buffer);

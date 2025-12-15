@@ -7,7 +7,8 @@ internal sealed class UnixTerminal : AnsiTerminal
     [DllImport("libc")]
     private static extern int write(int fd, byte[] buf, int n);
 
-    public UnixTerminal()
+    public UnixTerminal(ColorSystem colors)
+        : base(colors)
     {
         SupportsAnsi = true;
     }
