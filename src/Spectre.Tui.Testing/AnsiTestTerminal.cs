@@ -19,13 +19,15 @@ public sealed class AnsiTestTerminal : AnsiTerminal, ITestTerminal
                 Links = true,
                 AlternateBuffer = true,
             })
+    public AnsiTestTerminal(ColorSystem colors, Size? size = null, ITerminalMode? mode = null)
+        : base(colors, mode ?? new FullscreenMode())
     {
         _size = size ?? new Size(80, 25);
     }
 
     public override Size GetSize()
     {
-        return _size;
+        return Mode.GetSize(_size.Width, _size.Height);
     }
 
     protected override void Flush(string buffer)

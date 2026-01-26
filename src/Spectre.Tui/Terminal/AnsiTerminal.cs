@@ -6,22 +6,32 @@ public abstract class AnsiTerminal : ITerminal
     private readonly StringBuilder _buffer;
     private readonly AnsiWriter _writer;
     private readonly AnsiState _state;
+    private readonly AnsiBuilder _ansi;
+    private readonly Action<string> _write;
 
     public AnsiCapabilities Capabilities { get; }
+    public ColorSystem ColorSystem { get; protected set; }
+    protected ITerminalMode Mode { get; }
 
     protected AnsiTerminal(AnsiCapabilities capabilities)
+    protected AnsiTerminal(ColorSystem colors, ITerminalMode mode)
     {
         Capabilities = capabilities ?? throw new ArgumentNullException(nameof(capabilities));
 
         _buffer = new StringBuilder();
         _writer = new AnsiWriter(new StringWriter(_buffer), capabilities);
         _state = new AnsiState(_writer);
+        _ansi = new AnsiBuilder();
+        _write = text => _buffer.Append(text);
 
         _writer
             .EnterAltScreen()
             .CursorHome()
             .HideCursor();
+        ColorSystem = colors;
+        Mode = mode ?? throw new ArgumentNullException(nameof(mode));
 
+        Mode.OnAttach(_write);
         Flush();
     }
 
@@ -41,6 +51,7 @@ public abstract class AnsiTerminal : ITerminal
                 .ExitAltScreen()
                 .ShowCursor();
 
+            Mode.OnDetach(_write);
             Flush();
         }
     }
@@ -60,6 +71,7 @@ public abstract class AnsiTerminal : ITerminal
     public void Clear()
     {
         _writer.EraseInDisplay(2);
+        Mode.Clear(_write);
     }
 
     public abstract Size GetSize();
@@ -67,6 +79,7 @@ public abstract class AnsiTerminal : ITerminal
     public void MoveTo(int x, int y)
     {
         _writer.CursorPosition(y + 1, x + 1);
+        Mode.MoveTo(x, y, _write);
     }
 
     public void Write(Cell cell)
