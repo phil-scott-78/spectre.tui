@@ -4,8 +4,8 @@ namespace Spectre.Tui;
 public interface ITerminalMode
 {
     Size GetSize(int terminalWidth, int terminalHeight);
-    void OnAttach(Action<string> write);
-    void OnDetach(Action<string> write);
-    void Clear(Action<string> write);
-    void MoveTo(int x, int y, Action<string> write);
+    void OnAttach(AnsiWriter writer);
+    void OnDetach(AnsiWriter writer);
+    void Clear(AnsiWriter writer);
+    void MoveTo(int x, int y, AnsiWriter writer);
 }

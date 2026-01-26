@@ -10,11 +10,6 @@ public static class Terminal
 
     public static ITerminal Create(ITerminalMode mode)
     {
-        return Create(new FullscreenMode());
-    }
-
-    public static ITerminal Create(ITerminalMode mode)
-    {
         var caps = AnsiCapabilities.Create(System.Console.Out);
         if (!caps.Ansi)
         {

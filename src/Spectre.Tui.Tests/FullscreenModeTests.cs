@@ -25,17 +25,17 @@ public sealed class FullscreenModeTests
         public void Should_Enable_Alt_Screen_And_Hide_Cursor()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new FullscreenMode();
-            var output = new List<string>();
 
             // When
-            mode.OnAttach(output.Add);
+            mode.OnAttach(fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[?1049h\e[H",
-                "\e[?25l",
-            ]);
+            fixture.Output.ShouldBe(
+                "\e[?1049h\e[H" +
+                "\e[?25l"
+            );
         }
     }
 
@@ -45,17 +45,17 @@ public sealed class FullscreenModeTests
         public void Should_Disable_Alt_Screen_And_Show_Cursor()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new FullscreenMode();
-            var output = new List<string>();
 
             // When
-            mode.OnDetach(output.Add);
+            mode.OnDetach(fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[?1049l",
-                "\e[?25h",
-            ]);
+            fixture.Output.ShouldBe(
+                "\e[?1049l" +
+                "\e[?25h"
+            );
         }
     }
 
@@ -65,16 +65,14 @@ public sealed class FullscreenModeTests
         public void Should_Erase_Display()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new FullscreenMode();
-            var output = new List<string>();
 
             // When
-            mode.Clear(output.Add);
+            mode.Clear(fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[2J",
-            ]);
+            fixture.Output.ShouldBe("\e[2J");
         }
     }
 
@@ -84,32 +82,28 @@ public sealed class FullscreenModeTests
         public void Should_Emit_One_Based_Cursor_Position()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new FullscreenMode();
-            var output = new List<string>();
 
             // When
-            mode.MoveTo(0, 0, output.Add);
+            mode.MoveTo(0, 0, fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[1;1H",
-            ]);
+            fixture.Output.ShouldBe("\e[1;1H");
         }
 
         [Fact]
         public void Should_Offset_Coordinates_By_One()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new FullscreenMode();
-            var output = new List<string>();
 
             // When
-            mode.MoveTo(9, 4, output.Add);
+            mode.MoveTo(9, 4, fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[5;10H",
-            ]);
+            fixture.Output.ShouldBe("\e[5;10H");
         }
     }
 }

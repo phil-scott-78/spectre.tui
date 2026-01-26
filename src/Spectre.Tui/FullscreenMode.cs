@@ -1,5 +1,3 @@
-using Spectre.Tui.Ansi;
-
 namespace Spectre.Tui;
 
 [PublicAPI]
@@ -10,25 +8,26 @@ public sealed class FullscreenMode : ITerminalMode
         return new Size(terminalWidth, terminalHeight);
     }
 
-    public void OnAttach(Action<string> write)
+    public void OnAttach(AnsiWriter writer)
     {
-        write(AnsiSequences.EnableAltScreen + AnsiSequences.CursorHome);
-        write(AnsiSequences.HideCursor);
+        writer.EnterAltScreen();
+        writer.CursorHome();
+        writer.HideCursor();
     }
 
-    public void OnDetach(Action<string> write)
+    public void OnDetach(AnsiWriter writer)
     {
-        write(AnsiSequences.DisableAltScreen);
-        write(AnsiSequences.ShowCursor);
+        writer.ExitAltScreen();
+        writer.ShowCursor();
     }
 
-    public void Clear(Action<string> write)
+    public void Clear(AnsiWriter writer)
     {
-        write(AnsiSequences.EraseDisplay);
+        writer.EraseInDisplay(2);
     }
 
-    public void MoveTo(int x, int y, Action<string> write)
+    public void MoveTo(int x, int y, AnsiWriter writer)
     {
-        write(AnsiSequences.CursorPosition(y + 1, x + 1));
+        writer.CursorPosition(y + 1, x + 1);
     }
 }

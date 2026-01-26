@@ -1,5 +1,3 @@
-using Spectre.Tui.Ansi;
-
 namespace Spectre.Tui;
 
 [PublicAPI]
@@ -35,91 +33,91 @@ public sealed class InlineMode : ITerminalMode
         return new Size(terminalWidth, _currentHeight);
     }
 
-    public void OnAttach(Action<string> write)
+    public void OnAttach(AnsiWriter writer)
     {
         // Reserve scrollback space
         for (var i = 0; i < Height; i++)
         {
-            write("\n");
+            writer.Write("\n");
         }
 
         // Move back up
-        write(AnsiSequences.CursorUp(Height));
+        writer.CursorUp(Height);
 
         // Save cursor position and hide cursor
-        write(AnsiSequences.SaveCursor);
-        write(AnsiSequences.HideCursor);
+        writer.SaveCursor();
+        writer.HideCursor();
 
         _reservedLines = Height;
     }
 
-    public void OnDetach(Action<string> write)
+    public void OnDetach(AnsiWriter writer)
     {
         // Restore to top of region
-        write(AnsiSequences.RestoreCursor);
+        writer.RestoreCursor();
 
         // Move past the reserved region
         if (_reservedLines > 0)
         {
-            write(AnsiSequences.CursorDown(_reservedLines));
+            writer.CursorDown(_reservedLines);
         }
 
         // Show cursor and add newline
-        write(AnsiSequences.ShowCursor);
-        write("\n");
+        writer.ShowCursor();
+        writer.Write("\n");
     }
 
-    public void Clear(Action<string> write)
+    public void Clear(AnsiWriter writer)
     {
         if (_currentHeight > _reservedLines)
         {
             // Grow: reserve additional scrollback lines
-            write(AnsiSequences.RestoreCursor);
+            writer.RestoreCursor();
             if (_reservedLines > 0)
             {
-                write(AnsiSequences.CursorDown(_reservedLines));
+                writer.CursorDown(_reservedLines);
             }
 
             var additional = _currentHeight - _reservedLines;
             for (var i = 0; i < additional; i++)
             {
-                write("\n");
+                writer.Write("\n");
             }
 
-            write(AnsiSequences.CursorUp(_currentHeight));
-            write(AnsiSequences.SaveCursor);
+            writer.CursorUp(_currentHeight);
+            writer.SaveCursor();
         }
 
         // Clear all lines (covers current region + any excess from shrinking)
         var linesToClear = Math.Max(_currentHeight, _reservedLines);
-        write(AnsiSequences.RestoreCursor);
+        writer.RestoreCursor();
         for (var i = 0; i < linesToClear; i++)
         {
             if (i > 0)
             {
-                write(AnsiSequences.CursorDown(1));
+                writer.CursorDown(1);
             }
 
-            write(AnsiSequences.EraseLine);
+            writer.EraseInLine(2);
         }
 
-        write(AnsiSequences.RestoreCursor);
+        writer.RestoreCursor();
 
         _reservedLines = _currentHeight;
     }
 
-    public void MoveTo(int x, int y, Action<string> write)
+    public void MoveTo(int x, int y, AnsiWriter writer)
     {
         // Restore to saved position (top-left of region)
-        write(AnsiSequences.RestoreCursor);
+        writer.RestoreCursor();
 
         // Move down if needed
         if (y > 0)
         {
-            write(AnsiSequences.CursorDown(y));
+            writer.CursorDown(y);
         }
 
         // Move to absolute column
-        write(AnsiSequences.CursorToColumn(x + 1));
+        writer.CursorToColumn(x + 1);
     }
 }

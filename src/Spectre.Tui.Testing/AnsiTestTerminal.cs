@@ -11,16 +11,15 @@ public sealed class AnsiTestTerminal : AnsiTerminal, ITestTerminal
 
     public AnsiTestTerminal(
         ColorSystem colors = ColorSystem.TrueColor,
-        Size? size = null)
+        Size? size = null,
+        ITerminalMode? mode = null)
             : base(new AnsiCapabilities
             {
                 Ansi = true,
                 ColorSystem = colors,
                 Links = true,
                 AlternateBuffer = true,
-            })
-    public AnsiTestTerminal(ColorSystem colors, Size? size = null, ITerminalMode? mode = null)
-        : base(colors, mode ?? new FullscreenMode())
+            }, mode ?? new FullscreenMode())
     {
         _size = size ?? new Size(80, 25);
     }

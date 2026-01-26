@@ -54,19 +54,19 @@ public sealed class InlineModeTests
         public void Should_Reserve_Scrollback_Lines()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(3);
-            var output = new List<string>();
 
             // When
-            mode.OnAttach(output.Add);
+            mode.OnAttach(fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\n", "\n", "\n",
-                "\e[3A",
-                "\e[s",
-                "\e[?25l",
-            ]);
+            fixture.Output.ShouldBe(
+                "\n" + "\n" + "\n" +
+                "\e[3A" +
+                "\e[s" +
+                "\e[?25l"
+            );
         }
     }
 
@@ -76,38 +76,38 @@ public sealed class InlineModeTests
         public void Should_Restore_Cursor_Move_Past_Region_And_Show_Cursor()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(3);
-            mode.OnAttach(_ => { });
-            var output = new List<string>();
+            mode.OnAttach(fixture.NullWriter);
 
             // When
-            mode.OnDetach(output.Add);
+            mode.OnDetach(fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[u",
-                "\e[3B",
-                "\e[?25h",
-                "\n",
-            ]);
+            fixture.Output.ShouldBe(
+                "\e[u" +
+                "\e[3B" +
+                "\e[?25h" +
+                "\n"
+            );
         }
 
         [Fact]
         public void Should_Skip_CursorDown_When_No_Reserved_Lines()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(3);
-            var output = new List<string>();
 
             // When
-            mode.OnDetach(output.Add);
+            mode.OnDetach(fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[u",
-                "\e[?25h",
-                "\n",
-            ]);
+            fixture.Output.ShouldBe(
+                "\e[u" +
+                "\e[?25h" +
+                "\n"
+            );
         }
     }
 
@@ -117,108 +117,107 @@ public sealed class InlineModeTests
         public void Should_Erase_Each_Line_In_Steady_State()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(3);
-            mode.OnAttach(_ => { });
+            mode.OnAttach(fixture.NullWriter);
             mode.GetSize(80, 24);
-            var output = new List<string>();
 
             // When
-            mode.Clear(output.Add);
+            mode.Clear(fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[u",
-                "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[u",
-            ]);
+            fixture.Output.ShouldBe(
+                "\e[u" +
+                "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[u"
+            );
         }
 
         [Fact]
         public void Should_Reserve_Additional_Lines_When_Growing()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(3);
-            mode.OnAttach(_ => { });
+            mode.OnAttach(fixture.NullWriter);
             mode.SetHeight(5);
             mode.GetSize(80, 24);
-            var output = new List<string>();
 
             // When
-            mode.Clear(output.Add);
+            mode.Clear(fixture.Writer);
 
             // Then
-            output.ShouldBe([
+            fixture.Output.ShouldBe(
                 // Grow: restore, move past reserved, add newlines, move back up, save
-                "\e[u",
-                "\e[3B",
-                "\n", "\n",
-                "\e[5A",
-                "\e[s",
+                "\e[u" +
+                "\e[3B" +
+                "\n" + "\n" +
+                "\e[5A" +
+                "\e[s" +
                 // Clear 5 lines
-                "\e[u",
-                "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[u",
-            ]);
+                "\e[u" +
+                "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[u"
+            );
         }
 
         [Fact]
         public void Should_Clear_Old_Reserved_Region_When_Shrinking()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(5);
-            mode.OnAttach(_ => { });
+            mode.OnAttach(fixture.NullWriter);
             mode.SetHeight(3);
             mode.GetSize(80, 24);
-            var output = new List<string>();
 
             // When
-            mode.Clear(output.Add);
+            mode.Clear(fixture.Writer);
 
             // Then
-            output.ShouldBe([
+            fixture.Output.ShouldBe(
                 // No grow block
                 // Clear max(3, 5) = 5 lines
-                "\e[u",
-                "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[u",
-            ]);
+                "\e[u" +
+                "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[u"
+            );
         }
 
         [Fact]
         public void Should_Handle_Grow_From_Zero_Reserved_Lines()
         {
             // Given
-            var mode = new InlineMode(3);
-            // No OnAttach, so _reservedLines = 0
-            var output = new List<string>();
+            var fixture = new AnsiWriterFixture();
+            var mode = new InlineMode(3); // No OnAttach, so _reservedLines = 0
 
             // When
-            mode.Clear(output.Add);
+            mode.Clear(fixture.Writer);
 
             // Then
-            output.ShouldBe([
+            fixture.Output.ShouldBe(
                 // Grow: restore, skip CursorDown (0 reserved), add 3 newlines, move up, save
-                "\e[u",
-                "\n", "\n", "\n",
-                "\e[3A",
-                "\e[s",
+                "\e[u" +
+                "\n" + "\n" + "\n" +
+                "\e[3A" +
+                "\e[s" +
                 // Clear 3 lines
-                "\e[u",
-                "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[u",
-            ]);
+                "\e[u" +
+                "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[u"
+            );
         }
     }
 
@@ -228,35 +227,35 @@ public sealed class InlineModeTests
         public void Should_Move_To_Origin()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(5);
-            var output = new List<string>();
 
             // When
-            mode.MoveTo(0, 0, output.Add);
+            mode.MoveTo(0, 0, fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[u",
-                "\e[1G",
-            ]);
+            fixture.Output.ShouldBe(
+                "\e[u" +
+                "\e[1G"
+            );
         }
 
         [Fact]
         public void Should_Move_Down_And_To_Column()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(5);
-            var output = new List<string>();
 
             // When
-            mode.MoveTo(5, 3, output.Add);
+            mode.MoveTo(5, 3, fixture.Writer);
 
             // Then
-            output.ShouldBe([
-                "\e[u",
-                "\e[3B",
-                "\e[6G",
-            ]);
+            fixture.Output.ShouldBe(
+                "\e[u" +
+                "\e[3B" +
+                "\e[6G"
+            );
         }
     }
 
@@ -266,39 +265,39 @@ public sealed class InlineModeTests
         public void Should_Produce_Correct_Sequence_For_Full_Lifecycle()
         {
             // Given
+            var fixture = new AnsiWriterFixture();
             var mode = new InlineMode(3);
-            var output = new List<string>();
 
             // When
-            mode.OnAttach(output.Add);
+            mode.OnAttach(fixture.Writer);
             mode.GetSize(80, 24);
-            mode.Clear(output.Add);
-            mode.MoveTo(2, 1, output.Add);
-            mode.OnDetach(output.Add);
+            mode.Clear(fixture.Writer);
+            mode.MoveTo(2, 1, fixture.Writer);
+            mode.OnDetach(fixture.Writer);
 
             // Then
-            output.ShouldBe([
+            fixture.Output.ShouldBe(
                 // OnAttach: reserve 3 lines
-                "\n", "\n", "\n",
-                "\e[3A",
-                "\e[s",
-                "\e[?25l",
+                "\n" + "\n" + "\n" +
+                "\e[3A" +
+                "\e[s" +
+                "\e[?25l" +
                 // Clear: steady state (3 == 3)
-                "\e[u",
-                "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[1B", "\e[2K",
-                "\e[u",
+                "\e[u" +
+                "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[1B" + "\e[2K" +
+                "\e[u" +
                 // MoveTo(2, 1)
-                "\e[u",
-                "\e[1B",
-                "\e[3G",
+                "\e[u" +
+                "\e[1B" +
+                "\e[3G" +
                 // OnDetach
-                "\e[u",
-                "\e[3B",
-                "\e[?25h",
-                "\n",
-            ]);
+                "\e[u" +
+                "\e[3B" +
+                "\e[?25h" +
+                "\n"
+            );
         }
     }
 }
