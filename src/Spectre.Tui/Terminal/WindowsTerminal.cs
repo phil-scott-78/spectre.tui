@@ -1,7 +1,7 @@
 namespace Spectre.Tui.Ansi;
 
-internal sealed class WindowsTerminal(AnsiCapabilities capabilities)
-    : AnsiTerminal(capabilities)
+internal sealed class WindowsTerminal(AnsiCapabilities capabilities, ITerminalMode mode)
+    : AnsiTerminal(capabilities, mode)
 {
     protected override void Flush(string buffer)
     {
@@ -11,6 +11,6 @@ internal sealed class WindowsTerminal(AnsiCapabilities capabilities)
     public override Size GetSize()
     {
         // TODO: Use Win32 API to get console size
-        return new Size(System.Console.WindowWidth, System.Console.WindowHeight);
+        return Mode.GetSize(System.Console.WindowWidth, System.Console.WindowHeight);
     }
 }

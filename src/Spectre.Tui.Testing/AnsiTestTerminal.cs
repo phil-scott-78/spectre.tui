@@ -11,21 +11,22 @@ public sealed class AnsiTestTerminal : AnsiTerminal, ITestTerminal
 
     public AnsiTestTerminal(
         ColorSystem colors = ColorSystem.TrueColor,
-        Size? size = null)
+        Size? size = null,
+        ITerminalMode? mode = null)
             : base(new AnsiCapabilities
             {
                 Ansi = true,
                 ColorSystem = colors,
                 Links = true,
                 AlternateBuffer = true,
-            })
+            }, mode ?? new FullscreenMode())
     {
         _size = size ?? new Size(80, 25);
     }
 
     public override Size GetSize()
     {
-        return _size;
+        return Mode.GetSize(_size.Width, _size.Height);
     }
 
     protected override void Flush(string buffer)

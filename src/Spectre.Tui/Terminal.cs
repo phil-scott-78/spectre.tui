@@ -5,6 +5,11 @@ public static class Terminal
 {
     public static ITerminal Create()
     {
+        return Create(new FullscreenMode());
+    }
+
+    public static ITerminal Create(ITerminalMode mode)
+    {
         var caps = AnsiCapabilities.Create(System.Console.Out);
         if (!caps.Ansi)
         {
@@ -13,9 +18,9 @@ public static class Terminal
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return new WindowsTerminal(caps);
+            return new WindowsTerminal(caps, mode);
         }
 
-        return new UnixTerminal(caps);
+        return new UnixTerminal(caps, mode);
     }
 }

@@ -1,7 +1,7 @@
 namespace Spectre.Tui.Ansi;
 
-internal sealed class UnixTerminal(AnsiCapabilities capabilities)
-    : AnsiTerminal(capabilities)
+internal sealed class UnixTerminal(AnsiCapabilities capabilities, ITerminalMode mode)
+    : AnsiTerminal(capabilities, mode)
 {
     [DllImport("libc")]
     private static extern int write(int fd, byte[] buf, int n);
@@ -9,7 +9,7 @@ internal sealed class UnixTerminal(AnsiCapabilities capabilities)
     public override Size GetSize()
     {
         // TODO: Use ioctl with TIOCGWINSZ
-        return new Size(System.Console.WindowWidth, System.Console.WindowHeight);
+        return Mode.GetSize(System.Console.WindowWidth, System.Console.WindowHeight);
     }
 
     protected override void Flush(string buffer)
